@@ -1,10 +1,15 @@
 package com.emmanuelfo.lesson1.services;
 
 import com.emmanuelfo.lesson1.Dto.PostDto;
+import com.emmanuelfo.lesson1.Dto.PostRespond;
 import com.emmanuelfo.lesson1.exception.ResourceNotFoundException;
 import com.emmanuelfo.lesson1.model.Post;
 import com.emmanuelfo.lesson1.repositroy.PostRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -36,18 +41,34 @@ public class PostServiceImpl implements PostService {
 //        convert Entity back to Dto
         PostDto postResponse = newPost.mapToDto();
 
-//        postResponse.setId(newPost.getId());
-//        postResponse.setTitle(newPost.getTitle());
-//        postResponse.setDescription(newPost.getDescription());
-//        postResponse.setContent(newPost.getContent());
+
         return postResponse;
     }
 
     @Override
-    public List<PostDto> getAllPosts() {
-        List<Post> posts = postRepository.findAll();
-        return posts.stream().map(post -> post.mapToDto()).collect(Collectors.toList());
+    public PostRespond getAllPosts(int pageNo,int pageSize ,String sortBy,String sortDir) {
+
+
+//        Ternary for sorting in asc or desc order
+        Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())? Sort.by(sortBy).ascending(): Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(pageNo,pageSize, sort);
+
+        Page<Post> posts = postRepository.findAll(pageable);
+        List<Post> pageablePost = posts.getContent();
+
+        List<PostDto> content =  pageablePost.stream().map(post -> post.mapToDto()).collect(Collectors.toList());
+
+        PostRespond postRespond = new PostRespond();
+        postRespond.setContent(content);
+        postRespond.setPageNo(posts.getNumber());
+        postRespond.setPageSize(posts.getSize());
+        postRespond.setTotalElements(posts.getNumberOfElements());
+        postRespond.setTotalPages(posts.getTotalPages());
+        postRespond.setLast(posts.isLast());
+
+        return postRespond;
     }
+
 
     @Override
     public PostDto getPost(Long id) {

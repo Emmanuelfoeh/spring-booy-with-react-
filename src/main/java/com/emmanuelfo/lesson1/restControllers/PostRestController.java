@@ -1,6 +1,7 @@
 package com.emmanuelfo.lesson1.restControllers;
 
 import com.emmanuelfo.lesson1.Dto.PostDto;
+import com.emmanuelfo.lesson1.Dto.PostRespond;
 import com.emmanuelfo.lesson1.services.PostService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,8 +26,8 @@ public class PostRestController {
     }
 //    get all posts
     @GetMapping()
-    public List<PostDto> getPosts(){
-        return postService.getAllPosts();
+    public PostRespond getPosts(@RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo, @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize, @RequestParam(value = "sortBy" ,defaultValue = "id") String sortBy, @RequestParam(value = "sortDir",defaultValue = "asc",required = false) String sortDir ){
+        return postService.getAllPosts(pageNo,pageSize,sortBy,sortDir);
     }
 
 //    get Post by id
